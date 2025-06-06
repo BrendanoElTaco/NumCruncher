@@ -255,7 +255,7 @@ public class CalculatorLogic {
             // Secondary Mode log_y x
             if (isSecondaryMode) {
                 // Prompt the user for the base (y) using input dialog
-                String baseInput = JOptionPane.showInputDialog(this, "Enter the base (y) for the logarithm:");
+                String baseInput = JOptionPane.showInputDialog(calculator, "Enter the base (y) for the logarithm:");
                 
                 if (baseInput != null && !baseInput.isEmpty()) {
                     double base = Double.parseDouble(baseInput);
@@ -364,7 +364,7 @@ public class CalculatorLogic {
 			newInput = true;
 		//cosecant
 		} else {
-			result = 1 / Math.sin(num);
+                        result = 1 / Math.sin(Math.toRadians(num));
 			UI.getResultField().setText(String.valueOf(result));
 			currentInput = "";
 			newInput = true;
@@ -384,7 +384,7 @@ public class CalculatorLogic {
 			newInput = true;
 		//cotangent
 		} else {
-			result = 1 / Math.tan(num);
+                        result = 1 / Math.tan(Math.toRadians(num));
 			UI.getResultField().setText(String.valueOf(result));
 			currentInput = "";
 			newInput = true;
