@@ -2,12 +2,8 @@ import java.awt.*;
 import javax.swing.*;
 import java.awt.event.AWTEventListener;
 import java.awt.event.KeyEvent;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
-import javax.sound.sampled.FloatControl;
-import javax.sound.sampled.AudioInputStream;
-import java.io.File;
-import java.util.Random;
+import java.util.Arrays;
+import java.util.List;
 
 public class CalculatorUI extends JFrame {
 	/**
@@ -61,38 +57,25 @@ public class CalculatorUI extends JFrame {
     
     private JPanel mainPanel;
     
-    //Stuff for sound methods
-    private String[] soundFiles = {"sounds/key1.wav", "sounds/key2.wav", "sounds/key3.wav"};
-    private Random random = new Random();    
-    private boolean isMuted = false;
-    private float savedVolume = 0.0f; // Default volume level
-	
     //Fonts
     private final Font BUTTON_FONT = new Font("SansSerif", Font.BOLD, 20);
     //Unicode PI is small, so big font
     private final Font PI_BUTTON_FONT = new Font("SansSerif", Font.BOLD, 30);
-    
-	// Convert HTML color string to a Color object
-    // I stole these colors from the windows calculator
-    Color bgColor = Color.decode("#f3f3f3");
-    Color equalBgColor = Color.decode("#6ddcdb");
-    Color buttonBgColor = Color.decode("#f9f9f9");
-    Color darkBgColor = Color.decode("#202020");
-    Color darkEqualBgColor = Color.decode("#d8b597");
-    Color darkNumberBgColor = Color.decode("#3b3b3b");
-    Color darkButtonBgColor = Color.decode("#323232");
-    Color darkTextColor = Color.decode("#e1e1e1");
-    
+
     // Flag to manage the state of key listeners
     private boolean areKeyListenersEnabled = true;
-        
-	private Calculator calculator;
 
-	//Initialize UI
+        private Calculator calculator;
+    private SoundManager soundManager;
+    private ThemeManager themeManager;
+
+        //Initialize UI
     public void initializeUI(Calculator calc) {
         this.calculator = calc;
+        this.themeManager = new ThemeManager();
+        this.soundManager = new SoundManager(new String[]{"sounds/key1.wav", "sounds/key2.wav", "sounds/key3.wav"});
         setTitle("NumCruncher - A Scientific Calculator");
-		// Ensuring the application exits when the window is closed												   
+                // Ensuring the application exits when the window is closed
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(450, 550);
         setMinimumSize(new Dimension(450, 550));
@@ -109,11 +92,11 @@ public class CalculatorUI extends JFrame {
 
         // Create the main panel to hold the result field and button panel
         mainPanel = new JPanel();
-		// Setting the layout of the CalculatorUI to BorderLayout for organized component arrangement																					 
+                // Setting the layout of the CalculatorUI to BorderLayout for organized component arrangement
         mainPanel.setLayout(new BorderLayout());
         mainPanel.add(resultField, BorderLayout.NORTH);
         mainPanel.add(createButtonPanel(), BorderLayout.CENTER);
-        mainPanel.setBackground(bgColor);
+        mainPanel.setBackground(themeManager.getBackgroundColor());
         
         // Add the main panel to the frame
         add(mainPanel);
@@ -182,8 +165,8 @@ public class CalculatorUI extends JFrame {
         soundMenu.add(soundOff);
 
         // Action listeners for sound settings
-        soundOn.addActionListener(e -> unmuteSound());
-        soundOff.addActionListener(e -> muteSound());
+        soundOn.addActionListener(e -> soundManager.unmuteSound());
+        soundOff.addActionListener(e -> soundManager.muteSound());
 
         // Volume control action listener
         volumeControl.addActionListener(e -> {
@@ -192,10 +175,10 @@ public class CalculatorUI extends JFrame {
             volumeSlider.setPaintTicks(true);
             volumeSlider.setPaintLabels(true);
 
-            volumeSlider.addChangeListener(changeEvent -> {
-                int volume = volumeSlider.getValue();
-                updateVolume(volume);
-            });
+                volumeSlider.addChangeListener(changeEvent -> {
+                    int volume = volumeSlider.getValue();
+                soundManager.updateVolume(volume);
+                });
 
             // Create and show a dialog with the slider
             JDialog volumeDialog = new JDialog();
@@ -244,41 +227,35 @@ public class CalculatorUI extends JFrame {
         resultField = new JTextField(10);
         resultField.setEditable(false);
         resultField.setFont(new Font("SansSerif", Font.BOLD, 40));
-        resultField.setBackground(bgColor);   
+        resultField.setBackground(themeManager.getBackgroundColor());
         resultField.setHorizontalAlignment(JTextField.RIGHT);
     }
 
 	private void initializeNumberButtons() {
 	    numButtons = new JButton[10];
 	    for (int i = 0; i < 10; i++) {
-	        numButtons[i] = createButton(String.valueOf(i), BUTTON_FONT);
-	        numButtons[i].setBackground(buttonBgColor);
-	        numButtons[i].addActionListener(e -> {
-	            // Select a random sound file
-	            String randomSoundFile = soundFiles[random.nextInt(soundFiles.length)];
-	            playSound(randomSoundFile);
-	        });
-	    }
-	}
+                numButtons[i] = createButton(String.valueOf(i), BUTTON_FONT);
+                numButtons[i].addActionListener(e -> {
+                    soundManager.playRandomSound();
+                });
+            }
+        }
 
 	private void initializeOperationButtons() {
 	    operationButtons = new JButton[4];
 	    String[] operations = { "+", "-", "\u00d7", "\u00f7" };
 	    for (int i = 0; i < 4; i++) {
-	        operationButtons[i] = createButton(operations[i], BUTTON_FONT);
-	        operationButtons[i].setBackground(buttonBgColor);
-	        operationButtons[i].addActionListener(e -> {
-	            // Select a random sound file
-	            String randomSoundFile = soundFiles[random.nextInt(soundFiles.length)];
-	            playSound(randomSoundFile);
-	        });
-	    }
-	}
+                operationButtons[i] = createButton(operations[i], BUTTON_FONT);
+                operationButtons[i].addActionListener(e -> {
+                    soundManager.playRandomSound();
+                });
+            }
+        }
 
     private void initializeFunctionButtons() {
-    	calculateButton = createButton("=", BUTTON_FONT);
-    	calculateButton.setBackground(equalBgColor);
-    	calculateButton.addActionListener(e -> playSound("sounds/enter.wav"));
+        calculateButton = createButton("=", BUTTON_FONT);
+        calculateButton.setBackground(themeManager.getEqualBackgroundColor());
+        calculateButton.addActionListener(e -> soundManager.playSound("sounds/enter.wav"));
         signToggleButton = createButton("+/-", BUTTON_FONT);
         sinButton = createButton("sin", BUTTON_FONT);
         cosButton = createButton("cos", BUTTON_FONT);
@@ -286,8 +263,7 @@ public class CalculatorUI extends JFrame {
         decimalButton = createButton(".", BUTTON_FONT);
         powerOfButton = createButton("xⁿ", BUTTON_FONT);
         backspaceButton = createButton("⌫", BUTTON_FONT);
-        backspaceButton.setBackground(buttonBgColor);  
-        backspaceButton.addActionListener(e -> playSound("sounds/Backspacecut.wav"));
+        backspaceButton.addActionListener(e -> soundManager.playSound("sounds/Backspacecut.wav"));
         ceButton = createButton("CE", BUTTON_FONT);
         eulerButton = createButton("e", BUTTON_FONT);
         PIButton = createButton("𝜋", PI_BUTTON_FONT);
@@ -362,119 +338,41 @@ public class CalculatorUI extends JFrame {
     }
     
     private void setDarkMode() {
-    	mainPanel.setBackground(darkBgColor);
-        resultField.setBackground(darkBgColor);
-        for (JButton button : numButtons) {
-            button.setBackground(darkNumberBgColor);
-            button.setForeground(darkTextColor);
-        }
-        for (JButton button : operationButtons) {
-            button.setBackground(darkButtonBgColor);
-            button.setForeground(darkTextColor);
-        }
-        sinButton.setBackground(darkButtonBgColor);
-        cosButton.setBackground(darkButtonBgColor);
-        tanButton.setBackground(darkButtonBgColor);
-        decimalButton.setBackground(darkNumberBgColor);
-        signToggleButton.setBackground(darkNumberBgColor);
-        powerOfButton.setBackground(darkButtonBgColor);
-        backspaceButton.setBackground(darkButtonBgColor);
-        ceButton.setBackground(darkButtonBgColor);
-        eulerButton.setBackground(darkButtonBgColor);
-        PIButton.setBackground(darkButtonBgColor);
-        powerOfTenButton.setBackground(darkButtonBgColor);
-        sqrRootButton.setBackground(darkButtonBgColor);
-        logBaseTenButton.setBackground(darkButtonBgColor);
-        logBaseEButton.setBackground(darkButtonBgColor);
-        secondaryFunctionButton.setBackground(darkButtonBgColor);
-        xPowerOf2Button.setBackground(darkButtonBgColor);
-        secButton.setBackground(darkButtonBgColor);
-        cscButton.setBackground(darkButtonBgColor);
-        cotButton.setBackground(darkButtonBgColor);
-        moduloButton.setBackground(darkButtonBgColor);
-        calculateButton.setBackground(darkEqualBgColor);
-        
-        //Change text color to white
-        sinButton.setForeground(darkTextColor);
-        cosButton.setForeground(darkTextColor);
-        tanButton.setForeground(darkTextColor);
-        decimalButton.setForeground(darkTextColor);
-        signToggleButton.setForeground(darkTextColor);
-        powerOfButton.setForeground(darkTextColor);
-        backspaceButton.setForeground(darkTextColor);
-        ceButton.setForeground(darkTextColor);
-        eulerButton.setForeground(darkTextColor);
-        PIButton.setForeground(darkTextColor);
-        powerOfTenButton.setForeground(darkTextColor);
-        sqrRootButton.setForeground(darkTextColor);
-        logBaseTenButton.setForeground(darkTextColor);
-        logBaseEButton.setForeground(darkTextColor);
-        secondaryFunctionButton.setForeground(darkTextColor);
-        xPowerOf2Button.setForeground(darkTextColor);
-        secButton.setForeground(darkTextColor);
-        cscButton.setForeground(darkTextColor);
-        cotButton.setForeground(darkTextColor);
-        moduloButton.setForeground(darkTextColor);
-        resultField.setForeground(darkTextColor);
-        calculateButton.setForeground(darkTextColor);
+        themeManager.applyDarkMode(mainPanel, resultField, numButtons, operationButtons, getNumberLikeButtons(), getFunctionButtons(), calculateButton);
     }
-    
+
     private void setLightMode() {
-    	mainPanel.setBackground(bgColor);
-        resultField.setBackground(bgColor);
-        for (JButton button : numButtons) {
-            button.setBackground(buttonBgColor);
-            button.setForeground(null);
-        }
-        for (JButton button : operationButtons) {
-            button.setBackground(buttonBgColor);
-            button.setForeground(null);
-        }
-        sinButton.setBackground(buttonBgColor);
-        cosButton.setBackground(buttonBgColor);
-        tanButton.setBackground(buttonBgColor);
-        decimalButton.setBackground(buttonBgColor);
-        signToggleButton.setBackground(buttonBgColor);
-        powerOfButton.setBackground(buttonBgColor);
-        backspaceButton.setBackground(buttonBgColor);
-        ceButton.setBackground(buttonBgColor);
-        eulerButton.setBackground(buttonBgColor);
-        PIButton.setBackground(buttonBgColor);
-        powerOfTenButton.setBackground(buttonBgColor);
-        sqrRootButton.setBackground(buttonBgColor);
-        logBaseTenButton.setBackground(buttonBgColor);
-        logBaseEButton.setBackground(buttonBgColor);
-        secondaryFunctionButton.setBackground(buttonBgColor);
-        xPowerOf2Button.setBackground(buttonBgColor);
-        secButton.setBackground(buttonBgColor);
-        cscButton.setBackground(buttonBgColor);
-        cotButton.setBackground(buttonBgColor);
-        moduloButton.setBackground(buttonBgColor);
-        calculateButton.setBackground(equalBgColor);
-        
-        //Change text color to default
-        sinButton.setForeground(null);
-        cosButton.setForeground(null);
-        tanButton.setForeground(null);
-        decimalButton.setForeground(null);
-        signToggleButton.setForeground(null);
-        powerOfButton.setForeground(null);
-        backspaceButton.setForeground(null);
-        ceButton.setForeground(null);
-        eulerButton.setForeground(null);
-        PIButton.setForeground(null);
-        powerOfTenButton.setForeground(null);
-        sqrRootButton.setForeground(null);
-        logBaseTenButton.setForeground(null);
-        logBaseEButton.setForeground(null);
-        secondaryFunctionButton.setForeground(null);
-        xPowerOf2Button.setForeground(null);
-        secButton.setForeground(null);
-        cscButton.setForeground(null);
-        cotButton.setForeground(null);
-        moduloButton.setForeground(null);
-        resultField.setForeground(null);
-        calculateButton.setForeground(null);
+        themeManager.applyLightMode(mainPanel, resultField, numButtons, operationButtons, getNumberLikeButtons(), getFunctionButtons(), calculateButton);
+    }
+
+    private List<JButton> getFunctionButtons() {
+        return Arrays.asList(
+                sinButton,
+                cosButton,
+                tanButton,
+                powerOfButton,
+                backspaceButton,
+                ceButton,
+                eulerButton,
+                PIButton,
+                powerOfTenButton,
+                sqrRootButton,
+                logBaseTenButton,
+                logBaseEButton,
+                secondaryFunctionButton,
+                xPowerOf2Button,
+                secButton,
+                cscButton,
+                cotButton,
+                moduloButton
+        );
+    }
+
+    private List<JButton> getNumberLikeButtons() {
+        return Arrays.asList(
+                signToggleButton,
+                decimalButton
+        );
     }
     
     // Create a JButton with the given label and font, and attach an ActionListener
@@ -482,7 +380,7 @@ public class CalculatorUI extends JFrame {
         JButton button = new JButton(label);
         button.addActionListener(calculator);
         button.setFont(font);
-        button.setBackground(buttonBgColor);
+        button.setBackground(themeManager.getButtonBackgroundColor());
         return button;
     }
 
@@ -584,52 +482,6 @@ public class CalculatorUI extends JFrame {
         Toolkit.getDefaultToolkit().addAWTEventListener(listener, AWTEvent.KEY_EVENT_MASK);
     }
 
-    // Convert a linear slider value (0-100) to a decibel value for the volume control
-    private float convertSliderValueToDecibels(int sliderValue) {
-        float minDecibels = -80.0f; // Minimum decibel level for silence
-        if (sliderValue == 0) {
-            return minDecibels;
-        }
-        return (float) (minDecibels * (1 - (sliderValue / 100.0)));
-    }
-
-    private void playSound(String soundFileName) {
-        try {
-            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File(soundFileName).getAbsoluteFile());
-            Clip clip = AudioSystem.getClip();
-            clip.open(audioInputStream);
-
-            // Get the gain control from the clip
-            FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-
-            if (isMuted) {
-                gainControl.setValue(gainControl.getMinimum()); // Mute the sound
-            } else {
-                gainControl.setValue(savedVolume); // Set to the current saved volume
-            }
-
-            clip.start();
-        } catch(Exception e) {
-            System.out.println("Error with playing sound.");
-            e.printStackTrace();
-        }
-    }
-
-    // Method to update volume based on slider value
-    public void updateVolume(int sliderValue) {
-        savedVolume = convertSliderValueToDecibels(sliderValue);
-    }
-
-    // Method to mute the sound
-    public void muteSound() {
-        isMuted = true;
-    }
-
-    // Method to unmute the sound
-    public void unmuteSound() {
-        isMuted = false;
-    }
-    
     // Method to disable key listeners
     public void disableKeyListeners() {
         areKeyListenersEnabled = false;
