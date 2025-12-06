@@ -99,7 +99,8 @@ public class CalculatorUI extends JFrame {
         mainPanel.setBackground(themeManager.getBackgroundColor());
         
         // Add the main panel to the frame
-        add(mainPanel);
+        add(mainPanel, BorderLayout.CENTER);
+        add(createStatusBarWithVolumePopup(), BorderLayout.SOUTH);
         
         // Make the frame visible
         setVisible(true);
@@ -145,10 +146,6 @@ public class CalculatorUI extends JFrame {
     private JMenu createSoundMenu() {
         JMenu soundMenu = new JMenu("Sound");
 
-        // Menu item for volume control
-        JMenuItem volumeControl = new JMenuItem("Volume Control");
-        soundMenu.add(volumeControl);
-
         // Radio button menu items for sound on/off
         JRadioButtonMenuItem soundOn = new JRadioButtonMenuItem("On");
         JRadioButtonMenuItem soundOff = new JRadioButtonMenuItem("Off");
@@ -168,29 +165,42 @@ public class CalculatorUI extends JFrame {
         soundOn.addActionListener(e -> soundManager.unmuteSound());
         soundOff.addActionListener(e -> soundManager.muteSound());
 
-        // Volume control action listener
-        volumeControl.addActionListener(e -> {
-            JSlider volumeSlider = new JSlider(JSlider.VERTICAL, 0, 100, soundManager.getCurrentVolume()); // min, max, initial value
-            volumeSlider.setMajorTickSpacing(10);
-            volumeSlider.setMinorTickSpacing(5);
-            volumeSlider.setSnapToTicks(true);
-            volumeSlider.setPaintTicks(true);
-            volumeSlider.setPaintLabels(true);
+        return soundMenu;
+    }
 
-                volumeSlider.addChangeListener(changeEvent -> {
-                    int volume = volumeSlider.getValue();
-                soundManager.updateVolume(volume);
-                });
+    private JPanel createStatusBarWithVolumePopup() {
+        JPanel statusBar = new JPanel(new BorderLayout());
+        statusBar.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Color.LIGHT_GRAY));
 
-            // Create and show a dialog with the slider
-            JDialog volumeDialog = new JDialog();
-            volumeDialog.setTitle("Volume Control");
-            volumeDialog.add(volumeSlider);
-            volumeDialog.pack();
-            volumeDialog.setVisible(true);
+        JLabel readyLabel = new JLabel("Ready");
+        readyLabel.setBorder(BorderFactory.createEmptyBorder(2, 8, 2, 8));
+
+        JButton volumeButton = new JButton("Volume");
+        volumeButton.setFocusable(false);
+        volumeButton.setBorder(BorderFactory.createEmptyBorder(2, 8, 2, 8));
+
+        JSlider volumeSlider = new JSlider(JSlider.HORIZONTAL, 0, 100, soundManager.getCurrentVolume());
+        volumeSlider.setMajorTickSpacing(10);
+        volumeSlider.setMinorTickSpacing(5);
+        volumeSlider.setSnapToTicks(true);
+        volumeSlider.setPaintTicks(true);
+        volumeSlider.setPaintLabels(true);
+        volumeSlider.addChangeListener(e -> soundManager.updateVolume(volumeSlider.getValue()));
+
+        JPopupMenu volumePopup = new JPopupMenu();
+        JPanel popupPanel = new JPanel(new BorderLayout());
+        popupPanel.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+        popupPanel.add(new JLabel("Volume"), BorderLayout.NORTH);
+        popupPanel.add(volumeSlider, BorderLayout.CENTER);
+        volumePopup.add(popupPanel);
+
+        volumeButton.addActionListener(e -> {
+            volumePopup.show(volumeButton, 0, volumeButton.getHeight());
         });
 
-        return soundMenu;
+        statusBar.add(readyLabel, BorderLayout.WEST);
+        statusBar.add(volumeButton, BorderLayout.EAST);
+        return statusBar;
     }
 
     private JMenu createHelpMenu() {
