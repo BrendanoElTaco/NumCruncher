@@ -81,6 +81,8 @@ public class SoundManager {
         if (sliderValue == 0) {
             return MIN_DECIBEL_LEVEL;
         }
-        return (float) (MIN_DECIBEL_LEVEL * (1 - (sliderValue / 100.0)));
+        // Use logarithmic scaling so mid-range values are not excessively quiet
+        float decibels = (float) (20 * Math.log10(sliderValue / 100.0));
+        return Math.max(decibels, MIN_DECIBEL_LEVEL);
     }
 }
