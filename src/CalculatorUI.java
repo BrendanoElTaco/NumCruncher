@@ -1,9 +1,9 @@
 import java.awt.*;
-import javax.swing.*;
 import java.awt.event.AWTEventListener;
 import java.awt.event.KeyEvent;
 import java.util.Arrays;
 import java.util.List;
+import javax.swing.*;
 
 public class CalculatorUI extends JFrame {
 	/**
@@ -311,9 +311,7 @@ public class CalculatorUI extends JFrame {
 	    numButtons = new JButton[10];
 	    for (int i = 0; i < 10; i++) {
                 numButtons[i] = createButton(String.valueOf(i), BUTTON_FONT);
-                numButtons[i].addActionListener(e -> {
-                    soundManager.playRandomSound();
-                });
+                addClickSound(numButtons[i]);
             }
         }
 
@@ -322,9 +320,7 @@ public class CalculatorUI extends JFrame {
 	    String[] operations = { "+", "-", "\u00d7", "\u00f7" };
 	    for (int i = 0; i < 4; i++) {
                 operationButtons[i] = createButton(operations[i], BUTTON_FONT);
-                operationButtons[i].addActionListener(e -> {
-                    soundManager.playRandomSound();
-                });
+                addClickSound(operationButtons[i]);
             }
         }
 
@@ -333,26 +329,45 @@ public class CalculatorUI extends JFrame {
         calculateButton.setBackground(themeManager.getEqualBackgroundColor());
         calculateButton.addActionListener(e -> soundManager.playSound("sounds/enter.wav"));
         signToggleButton = createButton("+/-", BUTTON_FONT);
+        addClickSound(signToggleButton);
         sinButton = createButton("sin", BUTTON_FONT);
+        addClickSound(sinButton);
         cosButton = createButton("cos", BUTTON_FONT);
+        addClickSound(cosButton);
         tanButton = createButton("tan", BUTTON_FONT);
+        addClickSound(tanButton);
         decimalButton = createButton(".", BUTTON_FONT);
+        addClickSound(decimalButton);
         powerOfButton = createButton("xⁿ", BUTTON_FONT);
+        addClickSound(powerOfButton);
         backspaceButton = createButton("⌫", BUTTON_FONT);
         backspaceButton.addActionListener(e -> soundManager.playSound("sounds/Backspacecut.wav"));
         ceButton = createButton("CE", BUTTON_FONT);
+        addClickSound(ceButton);
         eulerButton = createButton("e", BUTTON_FONT);
+        addClickSound(eulerButton);
         PIButton = createButton("𝜋", PI_BUTTON_FONT);
+        addClickSound(PIButton);
         powerOfTenButton = createButton("10ˣ", BUTTON_FONT);
+        addClickSound(powerOfTenButton);
         sqrRootButton = createButton("√x", BUTTON_FONT);
+        addClickSound(sqrRootButton);
         logBaseTenButton = createButton("log" + "\u2081" + "\u2080", BUTTON_FONT);
+        addClickSound(logBaseTenButton);
         logBaseEButton = createButton("LN", BUTTON_FONT);
+        addClickSound(logBaseEButton);
         secondaryFunctionButton = createButton("2nd", BUTTON_FONT);
+        addClickSound(secondaryFunctionButton);
         xPowerOf2Button = createButton("x²", BUTTON_FONT);
+        addClickSound(xPowerOf2Button);
         secButton = createButton("sec", BUTTON_FONT);
+        addClickSound(secButton);
         cscButton = createButton("csc", BUTTON_FONT);
+        addClickSound(cscButton);
         cotButton = createButton("cot", BUTTON_FONT);
+        addClickSound(cotButton);
         moduloButton = createButton("%", BUTTON_FONT);
+        addClickSound(moduloButton);
     }
 
     private JPanel createButtonPanel() {
@@ -462,6 +477,11 @@ public class CalculatorUI extends JFrame {
         return button;
     }
 
+    // Adds a click sound to calculator buttons (excluding menu and status controls)
+    private void addClickSound(JButton button) {
+        button.addActionListener(e -> soundManager.playRandomSound());
+    }
+
 	// Global method to handle key events
     private void handleGlobalKeyEvents(AWTEvent event) {
     	// if listeners are disabled for a dialog input
@@ -470,8 +490,7 @@ public class CalculatorUI extends JFrame {
     	}
     	
     	// When key is pressed get its ID
-        if (event instanceof KeyEvent) {
-            KeyEvent ke = (KeyEvent) event;
+        if (event instanceof KeyEvent ke) {
             if (ke.getID() == KeyEvent.KEY_PRESSED) {
                 int key = ke.getKeyCode();
 
@@ -489,32 +508,20 @@ public class CalculatorUI extends JFrame {
 
                 // Check for operation key presses
                 switch (key) {
-                    case KeyEvent.VK_ADD:
-                        operationButtons[0].doClick();
-                        break;
-                    case KeyEvent.VK_SUBTRACT:
-                        operationButtons[1].doClick();
-                        break;
-                    case KeyEvent.VK_MULTIPLY:
-                        operationButtons[2].doClick();
-                        break;
-                    case KeyEvent.VK_DIVIDE:
-                        operationButtons[3].doClick();
-                        break;
-                    case KeyEvent.VK_ENTER:
-                        calculateButton.doClick();
-                        break;
-                    case KeyEvent.VK_BACK_SPACE:
-                    	ke.consume();  // Stop windows error sound playing when pressed
+                    case KeyEvent.VK_ADD -> operationButtons[0].doClick();
+                    case KeyEvent.VK_SUBTRACT -> operationButtons[1].doClick();
+                    case KeyEvent.VK_MULTIPLY -> operationButtons[2].doClick();
+                    case KeyEvent.VK_DIVIDE -> operationButtons[3].doClick();
+                    case KeyEvent.VK_ENTER -> calculateButton.doClick();
+                    case KeyEvent.VK_BACK_SPACE -> {
+                        ke.consume();  // Stop windows error sound playing when pressed
                         backspaceButton.doClick();
-                        break;
-                    case KeyEvent.VK_DELETE:
-                    	ke.consume();  // Stop windows error sound playing when pressed
+                    }
+                    case KeyEvent.VK_DELETE -> {
+                        ke.consume();  // Stop windows error sound playing when pressed
                         ceButton.doClick();
-                        break;
-                    case KeyEvent.VK_DECIMAL:
-                    	decimalButton.doClick();
-                    	break;
+                    }
+                    case KeyEvent.VK_DECIMAL -> decimalButton.doClick();
                 }
             }
         }
@@ -552,10 +559,8 @@ public class CalculatorUI extends JFrame {
 
     // Method to register the global event listener
     public void registerGlobalKeyEventListener() {
-        AWTEventListener listener = new AWTEventListener() {
-            public void eventDispatched(AWTEvent event) {
-                handleGlobalKeyEvents(event);
-            }
+        AWTEventListener listener = (AWTEvent event) -> {
+            handleGlobalKeyEvents(event);
         };
         Toolkit.getDefaultToolkit().addAWTEventListener(listener, AWTEvent.KEY_EVENT_MASK);
     }
