@@ -118,7 +118,6 @@ public class CalculatorUI extends JFrame {
         menuBar = new JMenuBar();
 
         menuBar.add(createCustomizationMenu());
-        menuBar.add(createSoundMenu());
         menuBar.add(createHelpMenu());
         menuBar.add(createAboutMenu());
 
@@ -151,37 +150,6 @@ public class CalculatorUI extends JFrame {
     }
 
     
-    private JMenu createSoundMenu() {
-        JMenu soundMenu = new JMenu("Sound");
-
-        // Radio button menu items for sound on/off
-        JRadioButtonMenuItem soundOn = new JRadioButtonMenuItem("On");
-        JRadioButtonMenuItem soundOff = new JRadioButtonMenuItem("Off");
-
-        soundOn.setSelected(true); // Set sound on as default
-
-        // Group the radio buttons
-        ButtonGroup soundGroup = new ButtonGroup();
-        soundGroup.add(soundOn);
-        soundGroup.add(soundOff);
-
-        // Add radio buttons to the menu
-        soundMenu.add(soundOn);
-        soundMenu.add(soundOff);
-
-        // Action listeners for sound settings
-        soundOn.addActionListener(e -> {
-            soundManager.unmuteSound();
-            updateMuteButtonIcon();
-        });
-        soundOff.addActionListener(e -> {
-            soundManager.muteSound();
-            updateMuteButtonIcon();
-        });
-
-        return soundMenu;
-    }
-
     private JPanel createStatusBarWithVolumePopup() {
         statusBar = new JPanel(new BorderLayout());
         statusBar.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, themeManager.getBorderColor()));
