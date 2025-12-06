@@ -68,6 +68,7 @@ public class CalculatorUI extends JFrame {
         private Calculator calculator;
     private SoundManager soundManager;
     private ThemeManager themeManager;
+    private JButton muteToggleButton;
 
         //Initialize UI
     public void initializeUI(Calculator calc) {
@@ -162,8 +163,14 @@ public class CalculatorUI extends JFrame {
         soundMenu.add(soundOff);
 
         // Action listeners for sound settings
-        soundOn.addActionListener(e -> soundManager.unmuteSound());
-        soundOff.addActionListener(e -> soundManager.muteSound());
+        soundOn.addActionListener(e -> {
+            soundManager.unmuteSound();
+            updateMuteButtonIcon();
+        });
+        soundOff.addActionListener(e -> {
+            soundManager.muteSound();
+            updateMuteButtonIcon();
+        });
 
         return soundMenu;
     }
@@ -198,9 +205,39 @@ public class CalculatorUI extends JFrame {
             volumePopup.show(volumeButton, 0, volumeButton.getHeight());
         });
 
+        muteToggleButton = new JButton();
+        muteToggleButton.setFocusable(false);
+        muteToggleButton.setBorder(BorderFactory.createEmptyBorder(2, 8, 2, 8));
+        updateMuteButtonIcon();
+        muteToggleButton.addActionListener(e -> {
+            if (soundManager.isMuted()) {
+                soundManager.unmuteSound();
+            } else {
+                soundManager.muteSound();
+            }
+            updateMuteButtonIcon();
+        });
+
         statusBar.add(readyLabel, BorderLayout.WEST);
-        statusBar.add(volumeButton, BorderLayout.EAST);
+        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 0));
+        rightPanel.setOpaque(false);
+        rightPanel.add(muteToggleButton);
+        rightPanel.add(volumeButton);
+        statusBar.add(rightPanel, BorderLayout.EAST);
         return statusBar;
+    }
+
+    private void updateMuteButtonIcon() {
+        if (muteToggleButton == null) {
+            return;
+        }
+        if (soundManager.isMuted()) {
+            muteToggleButton.setText("🔇");
+            muteToggleButton.setToolTipText("Unmute");
+        } else {
+            muteToggleButton.setText("🔊");
+            muteToggleButton.setToolTipText("Mute");
+        }
     }
 
     private JMenu createHelpMenu() {

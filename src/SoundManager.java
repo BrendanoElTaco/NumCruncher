@@ -73,6 +73,10 @@ public class SoundManager {
         isMuted = false;
     }
 
+    public boolean isMuted() {
+        return isMuted;
+    }
+
     public int getCurrentVolume() {
         return currentVolume;
     }
