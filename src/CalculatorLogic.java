@@ -213,7 +213,7 @@ public class CalculatorLogic {
         }
 
         double num = parsedInput.getAsDouble();
-        double result = 0.0;
+        double result;
         if (isSecondaryMode) {
             // Calculate 2 raised to the power of the current input
             result = Math.pow(2, num);
@@ -236,7 +236,7 @@ public class CalculatorLogic {
         }
 
         double num = parsedInput.getAsDouble();
-        double result = 0.0;
+        double result;
 
         if (isSecondaryMode) {
             if (num < 0) {
@@ -281,7 +281,7 @@ public class CalculatorLogic {
                 return;
             }
             
-            double result = 0.0;
+            double result;
             
             // Secondary Mode log_y x
             if (isSecondaryMode) {
@@ -320,7 +320,7 @@ public class CalculatorLogic {
         }
 
         double num = parsedInput.getAsDouble();
-        double result = 0.0;
+        double result;
         //E^x
         if (isSecondaryMode) {
             result = Math.pow(Math.E, num);
@@ -347,7 +347,7 @@ public class CalculatorLogic {
         }
 
         double num = parsedInput.getAsDouble();
-        double result = 0.0;
+        double result;
 
         //X cubed
         if (isSecondaryMode) {
@@ -383,7 +383,7 @@ public class CalculatorLogic {
                 }
 
                 double num = parsedInput.getAsDouble();
-                double result = 0.0;
+                double result;
                 //Arc secant
                 if (isSecondaryMode) {
                         result = Math.acos(1.0 / num);
@@ -406,7 +406,7 @@ public class CalculatorLogic {
                 }
 
                 double num = parsedInput.getAsDouble();
-                double result = 0.0;
+                double result;
 
                 //Arc cosecant
                 if (isSecondaryMode) {
@@ -431,7 +431,7 @@ public class CalculatorLogic {
                 }
 
                 double num = parsedInput.getAsDouble();
-                double result = 0.0;
+                double result;
 
                 //Arc cotangent
                 if (isSecondaryMode) {

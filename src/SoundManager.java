@@ -9,6 +9,7 @@ public class SoundManager {
     private final String[] soundFiles;
     private final Random random = new Random();
     private boolean isMuted = false;
+    private int currentVolume = 100;
     private float savedVolume = 0.0f;
 
     public SoundManager(String[] soundFiles) {
@@ -60,7 +61,8 @@ public class SoundManager {
 
     public void updateVolume(int sliderValue) {
         int clampedValue = Math.max(0, Math.min(100, sliderValue));
-        savedVolume = convertSliderValueToDecibels(clampedValue);
+        currentVolume = clampedValue;
+        savedVolume = convertSliderValueToDecibels(currentVolume);
     }
 
     public void muteSound() {
@@ -71,10 +73,16 @@ public class SoundManager {
         isMuted = false;
     }
 
+    public int getCurrentVolume() {
+        return currentVolume;
+    }
+
     private float convertSliderValueToDecibels(int sliderValue) {
         if (sliderValue == 0) {
             return MIN_DECIBEL_LEVEL;
         }
-        return (float) (MIN_DECIBEL_LEVEL * (1 - (sliderValue / 100.0)));
+        // Use logarithmic scaling so mid-range values are not excessively quiet
+        float decibels = (float) (20 * Math.log10(sliderValue / 100.0));
+        return Math.max(decibels, MIN_DECIBEL_LEVEL);
     }
 }

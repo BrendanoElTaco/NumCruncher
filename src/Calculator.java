@@ -19,27 +19,26 @@ public class Calculator extends JFrame implements ActionListener {
 	 *
 	 */
 	private static final long serialVersionUID = 4519143440307608770L;    
-    
-    CalculatorUI UI = new CalculatorUI();
-    CalculatorLogic logic = new CalculatorLogic(UI, this);
+    private final CalculatorUI UI;
+    private final CalculatorLogic logic;
     
     public Calculator() {
+        UI = new CalculatorUI();
+        logic = new CalculatorLogic(UI, this);
         UI.initializeUI(this);
-        JOptionPane.showMessageDialog(null, "Welcome to NumCruncher! \n" + "Please read the FAQ in the help center for operating instructions", "Welcome", JOptionPane.INFORMATION_MESSAGE);
+        String welcomeMessage = """
+                Welcome to NumCruncher!
+                Please read the FAQ in the help center for operating instructions
+                """;
+        JOptionPane.showMessageDialog(null, welcomeMessage, "Welcome", JOptionPane.INFORMATION_MESSAGE);
     }
-    
-    // Convert HTML color string to a Color object
-    Color bgColor = Color.decode("#f3f3f3");
-    Color equalBgColor = Color.decode("#695b2e");
-    Color buttonBgColor = Color.decode("#f9f9f9");
-    
+        
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		Object source = e.getSource(); // Identify the source of the action event
 		
 		//BUTTON HANDLING
-		if (source instanceof JButton) {
-			JButton button = (JButton) source;
+		if (source instanceof JButton button) {
 			String buttonText = button.getText();
 			
 			// Handle actions for numeric buttons (0-9)
@@ -158,8 +157,6 @@ public class Calculator extends JFrame implements ActionListener {
     }
 
 	public static void main(String[] args) {
-		SwingUtilities.invokeLater(() -> {
-			new Calculator();
-		});
+		SwingUtilities.invokeLater(Calculator::new);
 	}
 }
