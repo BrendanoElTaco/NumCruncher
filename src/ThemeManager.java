@@ -12,6 +12,7 @@ public class ThemeManager {
     private final Color darkNumberBgColor = Color.decode("#3b3b3b");
     private final Color darkButtonBgColor = Color.decode("#323232");
     private final Color darkTextColor = Color.decode("#e1e1e1");
+    private final Color lightTextColor = Color.BLACK;
 
     private boolean darkModeEnabled = false;
 
@@ -25,6 +26,18 @@ public class ThemeManager {
 
     public Color getBackgroundColor() {
         return darkModeEnabled ? darkBgColor : bgColor;
+    }
+
+    public Color getChromeBackgroundColor() {
+        return darkModeEnabled ? darkButtonBgColor : buttonBgColor;
+    }
+
+    public Color getTextColor() {
+        return darkModeEnabled ? darkTextColor : lightTextColor;
+    }
+
+    public Color getBorderColor() {
+        return darkModeEnabled ? Color.DARK_GRAY : Color.LIGHT_GRAY;
     }
 
     public void applyDarkMode(JPanel mainPanel, JTextField resultField, JButton[] numButtons, JButton[] operationButtons,

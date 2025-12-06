@@ -69,6 +69,12 @@ public class CalculatorUI extends JFrame {
     private SoundManager soundManager;
     private ThemeManager themeManager;
     private JButton muteToggleButton;
+    private JMenuBar menuBar;
+    private JPanel statusBar;
+    private JButton volumeButton;
+    private JSlider volumeSlider;
+    private JPanel volumePopupPanel;
+    private JLabel readyStatusLabel;
 
         //Initialize UI
     public void initializeUI(Calculator calc) {
@@ -102,13 +108,14 @@ public class CalculatorUI extends JFrame {
         // Add the main panel to the frame
         add(mainPanel, BorderLayout.CENTER);
         add(createStatusBarWithVolumePopup(), BorderLayout.SOUTH);
+        applyThemeToChrome();
         
         // Make the frame visible
         setVisible(true);
     }
     
     private void initializeMenuBar() {
-        JMenuBar menuBar = new JMenuBar();
+        menuBar = new JMenuBar();
 
         menuBar.add(createCustomizationMenu());
         menuBar.add(createSoundMenu());
@@ -176,17 +183,17 @@ public class CalculatorUI extends JFrame {
     }
 
     private JPanel createStatusBarWithVolumePopup() {
-        JPanel statusBar = new JPanel(new BorderLayout());
-        statusBar.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Color.LIGHT_GRAY));
+        statusBar = new JPanel(new BorderLayout());
+        statusBar.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, themeManager.getBorderColor()));
 
-        JLabel readyLabel = new JLabel("Ready");
-        readyLabel.setBorder(BorderFactory.createEmptyBorder(2, 8, 2, 8));
+        readyStatusLabel = new JLabel("Ready");
+        readyStatusLabel.setBorder(BorderFactory.createEmptyBorder(2, 8, 2, 8));
 
-        JButton volumeButton = new JButton("Volume");
+        volumeButton = new JButton("Volume");
         volumeButton.setFocusable(false);
         volumeButton.setBorder(BorderFactory.createEmptyBorder(2, 8, 2, 8));
 
-        JSlider volumeSlider = new JSlider(JSlider.HORIZONTAL, 0, 100, soundManager.getCurrentVolume());
+        volumeSlider = new JSlider(JSlider.HORIZONTAL, 0, 100, soundManager.getCurrentVolume());
         volumeSlider.setMajorTickSpacing(10);
         volumeSlider.setMinorTickSpacing(5);
         volumeSlider.setSnapToTicks(true);
@@ -195,11 +202,11 @@ public class CalculatorUI extends JFrame {
         volumeSlider.addChangeListener(e -> soundManager.updateVolume(volumeSlider.getValue()));
 
         JPopupMenu volumePopup = new JPopupMenu();
-        JPanel popupPanel = new JPanel(new BorderLayout());
-        popupPanel.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
-        popupPanel.add(new JLabel("Volume"), BorderLayout.NORTH);
-        popupPanel.add(volumeSlider, BorderLayout.CENTER);
-        volumePopup.add(popupPanel);
+        volumePopupPanel = new JPanel(new BorderLayout());
+        volumePopupPanel.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+        volumePopupPanel.add(new JLabel("Volume"), BorderLayout.NORTH);
+        volumePopupPanel.add(volumeSlider, BorderLayout.CENTER);
+        volumePopup.add(volumePopupPanel);
 
         volumeButton.addActionListener(e -> {
             volumePopup.show(volumeButton, 0, volumeButton.getHeight());
@@ -218,7 +225,7 @@ public class CalculatorUI extends JFrame {
             updateMuteButtonIcon();
         });
 
-        statusBar.add(readyLabel, BorderLayout.WEST);
+        statusBar.add(readyStatusLabel, BorderLayout.WEST);
         JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 0));
         rightPanel.setOpaque(false);
         rightPanel.add(muteToggleButton);
@@ -237,6 +244,58 @@ public class CalculatorUI extends JFrame {
         } else {
             muteToggleButton.setText("🔊");
             muteToggleButton.setToolTipText("Mute");
+        }
+    }
+
+    private void applyThemeToChrome() {
+        Color chromeBg = themeManager.getChromeBackgroundColor();
+        Color textColor = themeManager.getTextColor();
+        Color borderColor = themeManager.getBorderColor();
+
+        if (menuBar != null) {
+            menuBar.setBackground(chromeBg);
+            menuBar.setForeground(textColor);
+            for (int i = 0; i < menuBar.getMenuCount(); i++) {
+                JMenu menu = menuBar.getMenu(i);
+                if (menu != null) {
+                    menu.setBackground(chromeBg);
+                    menu.setForeground(textColor);
+                    for (int j = 0; j < menu.getItemCount(); j++) {
+                        JMenuItem item = menu.getItem(j);
+                        if (item != null) {
+                            item.setBackground(chromeBg);
+                            item.setForeground(textColor);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (statusBar != null) {
+            statusBar.setBackground(chromeBg);
+            statusBar.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, borderColor));
+        }
+        if (readyStatusLabel != null) {
+            readyStatusLabel.setForeground(textColor);
+        }
+        if (volumeButton != null) {
+            volumeButton.setBackground(chromeBg);
+            volumeButton.setForeground(textColor);
+        }
+        if (muteToggleButton != null) {
+            muteToggleButton.setBackground(chromeBg);
+            muteToggleButton.setForeground(textColor);
+        }
+        if (volumePopupPanel != null) {
+            volumePopupPanel.setBackground(chromeBg);
+            for (Component component : volumePopupPanel.getComponents()) {
+                component.setBackground(chromeBg);
+                component.setForeground(textColor);
+            }
+        }
+        if (volumeSlider != null) {
+            volumeSlider.setBackground(chromeBg);
+            volumeSlider.setForeground(textColor);
         }
     }
 
@@ -388,10 +447,12 @@ public class CalculatorUI extends JFrame {
     
     private void setDarkMode() {
         themeManager.applyDarkMode(mainPanel, resultField, numButtons, operationButtons, getNumberLikeButtons(), getFunctionButtons(), calculateButton);
+        applyThemeToChrome();
     }
 
     private void setLightMode() {
         themeManager.applyLightMode(mainPanel, resultField, numButtons, operationButtons, getNumberLikeButtons(), getFunctionButtons(), calculateButton);
+        applyThemeToChrome();
     }
 
     private List<JButton> getFunctionButtons() {
