@@ -170,8 +170,10 @@ public class CalculatorUI extends JFrame {
 
         // Volume control action listener
         volumeControl.addActionListener(e -> {
-            JSlider volumeSlider = new JSlider(JSlider.VERTICAL, 0, 100, 100); // min, max, initial value
+            JSlider volumeSlider = new JSlider(JSlider.VERTICAL, 0, 100, soundManager.getCurrentVolume()); // min, max, initial value
             volumeSlider.setMajorTickSpacing(10);
+            volumeSlider.setMinorTickSpacing(5);
+            volumeSlider.setSnapToTicks(true);
             volumeSlider.setPaintTicks(true);
             volumeSlider.setPaintLabels(true);
 
