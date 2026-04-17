@@ -27,16 +27,17 @@ public class CalculatorLogic {
     private String currentInput = "";
     private double num1;
     private double num2;
-    private String selectedOperation;
+    private String selectedOperation = "";
     private boolean isPositive = true;
     private boolean newInput = true;
     private boolean isSecondaryMode = false;
+    private boolean hasStoredOperand = false;
     
-    private final CalculatorUI UI;
+    private final CalculatorUI ui;
     private final Calculator calculator;
     
     public CalculatorLogic(CalculatorUI UI, Calculator calculator) {
-        this.UI = UI;
+        this.ui = UI;
         this.calculator = calculator;
     }
 	
@@ -48,7 +49,7 @@ public class CalculatorLogic {
         } else {
             currentInput += buttonText;
         }
-        UI.getResultField().setText(currentInput);
+        ui.getResultField().setText(currentInput);
     }
 
     public void handleOperatorButtons(String buttonText) {
@@ -59,16 +60,17 @@ public class CalculatorLogic {
             if (parsedInput.isEmpty()) {
                 return;
             }
-            if (newInput || num1 == 0) {
+            if (!hasStoredOperand) {
                 num1 = parsedInput.getAsDouble(); // Store the first operand
-                newInput = false;
+                hasStoredOperand = true;
             } else {
                 num2 = parsedInput.getAsDouble(); // Store the second operand
                 num1 = performOperation(num1, num2, selectedOperation); // Perform the previous operation
-                UI.getResultField().setText(String.valueOf(num1)); // Update the UI with the result
+                ui.getResultField().setText(String.valueOf(num1)); // Update the UI with the result
             }
             selectedOperation = buttonText; // Set the new operation
             currentInput = ""; // Clear current input for the next number
+            newInput = true;
         } else if (!newInput) {
             // If currentInput is empty but an operation was already in progress,
             // change the operation without affecting num1.
@@ -83,12 +85,22 @@ public class CalculatorLogic {
             return;
         }
 
+        if (selectedOperation == null || selectedOperation.isBlank()) {
+            num1 = parsedInput.getAsDouble();
+            hasStoredOperand = false;
+            ui.getResultField().setText(String.valueOf(num1));
+            currentInput = String.valueOf(num1);
+            newInput = true;
+            return;
+        }
+
         num2 = parsedInput.getAsDouble();
         num1 = performOperation(num1, num2, selectedOperation);
-        UI.getResultField().setText(String.valueOf(num1));
-        currentInput = "";
+        ui.getResultField().setText(String.valueOf(num1));
+        currentInput = String.valueOf(num1);
         selectedOperation = "";
         newInput = true;
+        hasStoredOperand = false;
     }
     
     public void handleToggleSignButton(String buttonText) {
@@ -104,7 +116,7 @@ public class CalculatorLogic {
         // Apply the sign change and update the current input and display
         input = isPositive ? Math.abs(input) : -Math.abs(input);
         currentInput = String.valueOf(input);
-        UI.getResultField().setText(currentInput);
+        ui.getResultField().setText(currentInput);
     }
     
     public void handleTrigButtons(Object source) {
@@ -117,21 +129,21 @@ public class CalculatorLogic {
         double result = 0.0;
 
         // Calculate the trigonometric result based on the clicked button
-        if (source == UI.getSinButton()) {
+        if (source == ui.getSinButton()) {
             if (isSecondaryMode) {
                 //arcsin
                 result = Math.asin(angle);
             } else {
                 result = Math.sin(Math.toRadians(angle));
             }
-        } else if (source == UI.getCosButton()) {
+        } else if (source == ui.getCosButton()) {
             if (isSecondaryMode) {
                 //arccos
                 result = Math.acos(angle);
             } else {
                 result = Math.cos(Math.toRadians(angle));
             }
-        } else if (source == UI.getTanButton()) {
+        } else if (source == ui.getTanButton()) {
             if (isSecondaryMode) {
                 //arctan
                 result = Math.atan(angle);
@@ -141,7 +153,7 @@ public class CalculatorLogic {
         }
 
         // Display the result, clear the current input for a new one
-        UI.getResultField().setText(String.valueOf(result));
+        ui.getResultField().setText(String.valueOf(result));
         currentInput = "";
         newInput = true;
     }
@@ -150,7 +162,7 @@ public class CalculatorLogic {
     	// Add a decimal point to the current input if not already present
 		if (!currentInput.contains(".")) {
 			currentInput += ".";
-			UI.getResultField().setText(currentInput);
+			ui.getResultField().setText(currentInput);
 		}
     }
     
@@ -158,7 +170,7 @@ public class CalculatorLogic {
     	if (!currentInput.isEmpty()) {
 			// Remove the last character from the current input
 			currentInput = currentInput.substring(0, currentInput.length() - 1);
-			UI.getResultField().setText(currentInput);
+			ui.getResultField().setText(currentInput);
 		}
     }
     
@@ -190,20 +202,21 @@ public class CalculatorLogic {
 		selectedOperation = "";
 		isPositive = true;
 		newInput = true;
-		UI.getResultField().setText("");
+		ui.getResultField().setText("");
+        hasStoredOperand = false;
     }
     
     public void handleEulersButton(Object source) {
     	// Set the current input to Euler's number and display it
 		currentInput = String.valueOf(Math.E); // Euler's number (approximately 2.71828)
-		UI.getResultField().setText(currentInput);
+		ui.getResultField().setText(currentInput);
 		newInput = true;
     }
     
     public void handlePIButton(Object source) {
     	// Set the current input to π (pi) and display it
 		currentInput = String.valueOf(Math.PI);
-		UI.getResultField().setText(currentInput);
+		ui.getResultField().setText(currentInput);
     }
     
     public void handlePowerOfTenButton(Object source) {
@@ -217,13 +230,13 @@ public class CalculatorLogic {
         if (isSecondaryMode) {
             // Calculate 2 raised to the power of the current input
             result = Math.pow(2, num);
-            UI.getResultField().setText(String.valueOf(result));
+            ui.getResultField().setText(String.valueOf(result));
             currentInput = "";
             newInput = true;
         } else {
             // Calculate 10 raised to the power of the current input
             result = Math.pow(10, num);
-            UI.getResultField().setText(String.valueOf(result));
+            ui.getResultField().setText(String.valueOf(result));
             currentInput = "";
             newInput = true;
         }
@@ -246,7 +259,7 @@ public class CalculatorLogic {
             } else {
                 //Cube-root
                 result = Math.cbrt(num);
-                UI.getResultField().setText(String.valueOf(result));
+                ui.getResultField().setText(String.valueOf(result));
                 currentInput = "";
                 newInput = true;
             }
@@ -259,7 +272,7 @@ public class CalculatorLogic {
             } else {
                 // Square-root
                 result = Math.sqrt(num);
-                UI.getResultField().setText(String.valueOf(result));
+                ui.getResultField().setText(String.valueOf(result));
                 currentInput = "";
                 newInput = true;
             }
@@ -268,7 +281,7 @@ public class CalculatorLogic {
     
     public void handleLogBaseTenButton(Object source) {
         // Disable key listeners before showing the dialog
-        UI.disableKeyListeners();
+        ui.disableKeyListeners();
 
         try {
             OptionalDouble parsedInput = parseInputOrAlert(currentInput);
@@ -296,20 +309,20 @@ public class CalculatorLogic {
                     } else {
                         // Calculate the logarithm (log base y of x)
                         result = Math.log(num) / Math.log(base);
-                        UI.getResultField().setText(String.valueOf(result));
+                        ui.getResultField().setText(String.valueOf(result));
                         currentInput = "";
                         newInput = true;
                     }
                 }
             } else {
                 result = Math.log10(num);
-                UI.getResultField().setText(String.valueOf(result));
+                ui.getResultField().setText(String.valueOf(result));
                 currentInput = "";
                 newInput = true;    
             }
         } finally {
             // Re-enable key listeners after the dialog is closed
-            UI.enableKeyListeners();
+            ui.enableKeyListeners();
         }
     }
 
@@ -324,7 +337,7 @@ public class CalculatorLogic {
         //E^x
         if (isSecondaryMode) {
             result = Math.pow(Math.E, num);
-            UI.getResultField().setText(String.valueOf(result));
+            ui.getResultField().setText(String.valueOf(result));
             currentInput = "";
             newInput = true;
         //LN
@@ -333,7 +346,7 @@ public class CalculatorLogic {
                 JOptionPane.showMessageDialog(calculator, "Invalid number for logarithm", "Error", JOptionPane.ERROR_MESSAGE);
             } else {
                 result = Math.log(num);
-                UI.getResultField().setText(String.valueOf(result));
+                ui.getResultField().setText(String.valueOf(result));
                 currentInput = "";
                 newInput = true;
             }
@@ -352,13 +365,13 @@ public class CalculatorLogic {
         //X cubed
         if (isSecondaryMode) {
             result = Math.pow(num, 3);
-            UI.getResultField().setText(String.valueOf(result));
+            ui.getResultField().setText(String.valueOf(result));
             currentInput = "";
             newInput = true;
         //X squared
         } else {
             result = Math.pow(num, 2);
-            UI.getResultField().setText(String.valueOf(result));
+            ui.getResultField().setText(String.valueOf(result));
             currentInput = "";
             newInput = true;
         }
@@ -387,13 +400,13 @@ public class CalculatorLogic {
                 //Arc secant
                 if (isSecondaryMode) {
                         result = Math.acos(1.0 / num);
-                        UI.getResultField().setText(String.valueOf(result));
+                        ui.getResultField().setText(String.valueOf(result));
                         currentInput = "";
                         newInput = true;
                 //Secant
                 } else {
                         result = 1 / Math.cos(Math.toRadians(num));
-                        UI.getResultField().setText(String.valueOf(result));
+                        ui.getResultField().setText(String.valueOf(result));
                         currentInput = "";
                         newInput = true;
                 }
@@ -411,13 +424,13 @@ public class CalculatorLogic {
                 //Arc cosecant
                 if (isSecondaryMode) {
                         result = Math.asin(1.0 / num);
-                        UI.getResultField().setText(String.valueOf(result));
+                        ui.getResultField().setText(String.valueOf(result));
                         currentInput = "";
                         newInput = true;
                 //cosecant
                 } else {
                         result = 1 / Math.sin(Math.toRadians(num));
-                        UI.getResultField().setText(String.valueOf(result));
+                        ui.getResultField().setText(String.valueOf(result));
                         currentInput = "";
                         newInput = true;
                 }
@@ -436,13 +449,13 @@ public class CalculatorLogic {
                 //Arc cotangent
                 if (isSecondaryMode) {
                         result = Math.atan(1.0 / num);
-                        UI.getResultField().setText(String.valueOf(result));
+                        ui.getResultField().setText(String.valueOf(result));
                         currentInput = "";
                         newInput = true;
                 //cotangent
                 } else {
                         result = 1 / Math.tan(Math.toRadians(num));
-                        UI.getResultField().setText(String.valueOf(result));
+                        ui.getResultField().setText(String.valueOf(result));
                         currentInput = "";
                         newInput = true;
                 }
@@ -450,14 +463,14 @@ public class CalculatorLogic {
 	
         public void handleSecondaryFunctionButton(Object source) {
         isSecondaryMode = !isSecondaryMode;
-        UI.updateSecondaryFunctionLabels(isSecondaryMode);
+        ui.updateSecondaryFunctionLabels(isSecondaryMode);
     }
 
         private OptionalDouble parseInputOrAlert(String input) {
                 if (input == null || input.trim().isEmpty()) {
                         JOptionPane.showMessageDialog(calculator, "Please enter a number before performing this operation.", "Input Required", JOptionPane.INFORMATION_MESSAGE);
                         currentInput = "";
-                        UI.getResultField().setText("");
+                        ui.getResultField().setText("");
                         newInput = true;
                         return OptionalDouble.empty();
                 }
@@ -467,7 +480,7 @@ public class CalculatorLogic {
                 } catch (NumberFormatException e) {
                         JOptionPane.showMessageDialog(calculator, "Invalid input. Please enter a valid number.", "Error", JOptionPane.ERROR_MESSAGE);
                         currentInput = "";
-                        UI.getResultField().setText("");
+                        ui.getResultField().setText("");
                         newInput = true;
                         return OptionalDouble.empty();
                 }
