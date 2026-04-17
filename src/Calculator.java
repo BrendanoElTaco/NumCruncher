@@ -1,9 +1,8 @@
-import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.*;
 
-public class Calculator extends JFrame implements ActionListener {
+public final class Calculator extends JFrame implements ActionListener {
 	/**
 	 * Main Calculator Class - NumCruncher Application
 	 * Developed by Brendan LeGrand for CSCI 3300 - Term Project.
@@ -19,18 +18,21 @@ public class Calculator extends JFrame implements ActionListener {
 	 *
 	 */
 	private static final long serialVersionUID = 4519143440307608770L;    
-    private final CalculatorUI UI;
-    private final CalculatorLogic logic;
+    private final CalculatorUI ui;
+    private transient CalculatorLogic logic;
     
     public Calculator() {
-        UI = new CalculatorUI();
-        logic = new CalculatorLogic(UI, this);
-        UI.initializeUI(this);
+        ui = new CalculatorUI();
+    }
+
+    private void start() {
+        logic = new CalculatorLogic(ui, this);
+        ui.initializeUI(this);
         String welcomeMessage = """
                 Welcome to NumCruncher!
                 Please read the FAQ in the help center for operating instructions
                 """;
-        JOptionPane.showMessageDialog(null, welcomeMessage, "Welcome", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(ui, welcomeMessage, "Welcome", JOptionPane.INFORMATION_MESSAGE);
     }
         
 	@Override
@@ -57,92 +59,92 @@ public class Calculator extends JFrame implements ActionListener {
 			}
 			
 			// Handle the action for the sign toggle button
-			else if (source == UI.getSignToggleButton()) {
+			else if (source == ui.getSignToggleButton()) {
 				logic.handleToggleSignButton(buttonText);
 			}
 
 			// Handle the action for trigonometric function buttons (sin, cos, tan)
-			else if (source == UI.getSinButton() || source == UI.getCosButton() || source == UI.getTanButton()) {
+			else if (source == ui.getSinButton() || source == ui.getCosButton() || source == ui.getTanButton()) {
 				logic.handleTrigButtons(source);
 			}
 
 			// Handle the action for the decimal button
-			else if (source == UI.getDecimalButton()) {
+			else if (source == ui.getDecimalButton()) {
 				logic.handleDecimalButton(source);
 			}
 
 			// Handle the action for the backspace button
-			else if (source == UI.getBackspaceButton()) {
+			else if (source == ui.getBackspaceButton()) {
 				logic.handleBackspaceButton(source);
 			}
 
 			// Handle the action for the power of button (xⁿ)
-			else if (source == UI.getPowerOfButton()) {
+			else if (source == ui.getPowerOfButton()) {
 				logic.handlePowerOfButton(source);
 			}
 
 			// Handle the action for the clear button (CE)
-			else if (source == UI.getCeButton()) {
+			else if (source == ui.getCeButton()) {
 				logic.handleClearButton(source);
 			}
 
 			// Handle the action for Euler's button (e)
-			else if (source == UI.getEulerButton()) {
+			else if (source == ui.getEulerButton()) {
 				logic.handleEulersButton(source);
 			}
 
 			// Handle the action for the PI button (π)
-			else if (source == UI.getPIButton()) {
+			else if (source == ui.getPIButton()) {
 				logic.handlePIButton(source);
 			}
 
 			// Handle the action for the power of ten button (10^x)
-			else if (source == UI.getPowerOfTenButton()) {
+			else if (source == ui.getPowerOfTenButton()) {
 				logic.handlePowerOfTenButton(source);
 			}
 			
 			//Handle the action for the square root button
-			else if (source == UI.getSqrRootButton()) {
+			else if (source == ui.getSqrRootButton()) {
 				logic.handleSqrRootButton(source);
 			}
 			
 			//Handle the action for the log base 10 button
-			else if (source == UI.getLogBaseTenButton()) {
+			else if (source == ui.getLogBaseTenButton()) {
 				logic.handleLogBaseTenButton(source);			
 			}
 			
 			//Handle the action for the log base e button
-			else if (source == UI.getLogBaseEButton()) {
+			else if (source == ui.getLogBaseEButton()) {
 				logic.handleLogBaseEButton(source);				
 			}
 			
 			//Handle the action for the xPowerOf2Button button
-			else if (source == UI.getxPowerOf2Button()) {
+			else if (source == ui.getxPowerOf2Button()) {
 				logic.handleXPowerOf2Button(source);
 			}
 			
 			//Handle the action for the secant function button
-			else if (source == UI.getSecButton()) {
+			else if (source == ui.getSecButton()) {
 				logic.handleSecButton(source);
 			}
 			
 			//Handle the action for the cosecant function button
-			else if (source == UI.getCscButton()) {
+			else if (source == ui.getCscButton()) {
 				logic.handleCscButton(source);
 			}
 			
 			//Handle the action for the cotangent function button
-			else if (source == UI.getCotButton()) {
+			else if (source == ui.getCotButton()) {
 				logic.handleCotButton(source);
 			}
 			
 			// Handle the action for the modulo button
-			else if (source == UI.getModuloButton()) {
+			else if (source == ui.getModuloButton()) {
 				logic.handleModuloButton(source);
 			}
 						
 			//Handle the action for the secondary function button
-			else if (source == UI.getSecondaryFunctionButton()) {
+			else if (source == ui.getSecondaryFunctionButton()) {
 				logic.handleSecondaryFunctionButton(source);
 			}
 		}		
@@ -153,10 +155,10 @@ public class Calculator extends JFrame implements ActionListener {
 	}
 	
 	public void errorMessage(String message) {
-        JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(ui, message, "Error", JOptionPane.ERROR_MESSAGE);
     }
 
 	public static void main(String[] args) {
-		SwingUtilities.invokeLater(Calculator::new);
+		SwingUtilities.invokeLater(() -> new Calculator().start());
 	}
 }
